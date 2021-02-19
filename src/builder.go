@@ -1,16 +1,20 @@
 package src
 
 import (
+	"fmt"
 	"math/rand"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
-func GetRandomName(l int) (string, error) {
+func init() {
 	err := loadData("../src/input_names.txt")
 	if err != nil {
-		return "", errors.Wrapf(err, "creating random name with len of %d", l)
+		panic(err)
+	}
+}
+func GetRandomName(l int) (string, error) {
+	if data == nil {
+		return "", fmt.Errorf("data is not loaded")
 	}
 
 	pivot := getFirstLetter()
