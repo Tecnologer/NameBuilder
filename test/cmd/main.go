@@ -10,7 +10,7 @@ import (
 func main() {
 
 	for i := 0; i < 10; i++ {
-		name, err := src.GetRandomName(rand.Intn(10-4) + 4)
+		name, err := src.GetRandomName(rand.Intn(6) + 4)
 		if err != nil {
 			continue
 		}
