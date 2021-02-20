@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"os"
 	"regexp"
+	"strings"
 
 	"github.com/pkg/errors"
 )
@@ -28,6 +29,8 @@ func loadData(path string) error {
 				continue
 			}
 
+			letter = strings.ToLower(letter)
+
 			//check if it's no the last letter
 			if i+1 >= len(dataRead) {
 				continue
@@ -39,7 +42,7 @@ func loadData(path string) error {
 			}
 
 			//count match
-			nextLetter = string(dataRead[i+1])
+			nextLetter = strings.ToLower(string(dataRead[i+1]))
 			dataTemp[letter][nextLetter]++
 
 			if i+2 >= len(dataRead) {
@@ -51,7 +54,7 @@ func loadData(path string) error {
 				dataTemp[combine] = make(map[string]int)
 			}
 
-			nextLetter = string(dataRead[i+2])
+			nextLetter = strings.ToLower(string(dataRead[i+2]))
 			dataTemp[combine][nextLetter]++
 		}
 	}
