@@ -1,11 +1,10 @@
-package src
+package randname
 
 import (
 	"fmt"
 	"math/rand"
 	"path"
 	"runtime"
-	"sort"
 	"strings"
 )
 
@@ -23,21 +22,56 @@ func init() {
 	}
 
 }
-func GetRandomName(l int) (string, error) {
+
+//GetRandomWithSeed generates a random name with the specified len and starting with the seed
+func GetRandomWithSeed(seed string, l int) (string, error) {
 	if data == nil {
 		return "", fmt.Errorf("data is not loaded")
 	}
 
-	pivot := getFirstLetter()
-	name := strings.ToUpper(string(pivot))
+	pivot := seed
+	if seed == "" {
+		for i := 0; i < 10 && pivot == ""; i++ {
+			pivot = getPivot()
+		}
+	}
+
+	combined := pivot
+	var pivot2 string
+	name := strings.ToUpper(pivot[:1])
+	if len(pivot) > 1 {
+		name += pivot[1:2]
+	}
 	for i := 1; i < l; i++ {
-		pivot = getNext(pivot)
+		pivot2 = getNext(combined)
+		if pivot == "" {
+			continue
+		}
+
+		if len(pivot) > 1 {
+			combined = pivot[1:] + pivot2
+		} else {
+			combined = pivot + pivot2
+		}
+
+		pivot = pivot2
 		name += strings.ToLower(string(pivot))
 	}
+
 	return name, nil
 }
 
-func getFirstLetter() byte {
+//GetRandom generates a random name with the specified len
+func GetRandom(l int) (string, error) {
+	if data == nil {
+		return "", fmt.Errorf("data is not loaded")
+	}
+
+	pivot := getPivot()
+	return GetRandomWithSeed(pivot, l)
+}
+
+func getPivot() string {
 	index := rand.Intn(len(data) - 1)
 
 	count := 0
@@ -48,11 +82,15 @@ func getFirstLetter() byte {
 		count++
 	}
 
-	return 0
+	return ""
 }
 
-func getNext(pivot byte) byte {
+func getNext(pivot string) string {
 	values := make([]*letterValue, 0)
+
+	if _, ok := data[pivot]; !ok {
+		return ""
+	}
 
 	for c, v := range data[pivot] {
 		values = append(values, &letterValue{c, v})
@@ -72,45 +110,4 @@ func getNext(pivot byte) byte {
 
 	return values[index].letter
 
-}
-
-type letterValue struct {
-	letter      byte
-	probability float32
-}
-
-type letterSorter struct {
-	letters []*letterValue
-	by      By
-}
-
-func byProbilityDesc(l, l2 *letterValue) bool {
-	return l.probability > l2.probability
-}
-
-// By is the type of a "less" function that defines the ordering of its Planet arguments.
-type By func(p1, p2 *letterValue) bool
-
-// Sort is a method on the function type, By, that sorts the argument slice according to the function.
-func (by By) Sort(letters []*letterValue) {
-	ps := &letterSorter{
-		letters: letters,
-		by:      by, // The Sort method's receiver is the function (closure) that defines the sort order.
-	}
-	sort.Sort(ps)
-}
-
-// Len is part of sort.Interface.
-func (s *letterSorter) Len() int {
-	return len(s.letters)
-}
-
-// Swap is part of sort.Interface.
-func (s *letterSorter) Swap(i, j int) {
-	s.letters[i], s.letters[j] = s.letters[j], s.letters[i]
-}
-
-// Less is part of sort.Interface. It is implemented by calling the "by" closure in the sorter.
-func (s *letterSorter) Less(i, j int) bool {
-	return s.by(s.letters[i], s.letters[j])
 }
