@@ -3,18 +3,16 @@ package src
 import (
 	"bufio"
 	"os"
+	"regexp"
 
 	"github.com/pkg/errors"
-)
-
-const (
-	enter = 0x0d
 )
 
 var data map[byte]map[byte]float32
 
 func loadData(path string) error {
 	dataTemp := make(map[byte]map[byte]int)
+	noChars := regexp.MustCompile(`\W`)
 
 	dataChannel, err := readData(path)
 	if err != nil {
@@ -23,7 +21,7 @@ func loadData(path string) error {
 	total := 0
 	for dataRead := range dataChannel {
 		for i, c := range dataRead {
-			if c == enter {
+			if noChars.Match([]byte{c}) {
 				continue
 			}
 
