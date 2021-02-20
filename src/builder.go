@@ -3,15 +3,25 @@ package src
 import (
 	"fmt"
 	"math/rand"
+	"path"
+	"runtime"
 	"sort"
 	"strings"
 )
 
 func init() {
-	err := loadData("../../src/input_names.txt")
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		panic("file 'input_names.txt' not found")
+	}
+
+	filepath := path.Join(path.Dir(filename), "../src/input_names.txt")
+
+	err := loadData(filepath)
 	if err != nil {
 		panic(err)
 	}
+
 }
 func GetRandomName(l int) (string, error) {
 	if data == nil {
