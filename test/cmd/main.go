@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/pkg/profile"
 	randName "github.com/tecnologer/NameBuilder/src"
 )
 
@@ -17,7 +16,9 @@ var (
 )
 
 func main() {
-	defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
+	// defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
+	//defer profile.Start(profile.MemProfile, profile.MemProfileRate(1), profile.ProfilePath(".")).Stop()
+	// defer profile.Start(profile.TraceProfile, profile.ProfilePath(".")).Stop()
 
 	flag.Parse()
 	var l int
