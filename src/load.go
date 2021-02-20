@@ -18,7 +18,7 @@ func loadData(path string) error {
 	if err != nil {
 		return errors.Wrapf(err, "trying lading data from file: %s", path)
 	}
-	total := 0
+
 	for dataRead := range dataChannel {
 		for i, c := range dataRead {
 			if noChars.Match([]byte{c}) {
@@ -32,11 +32,10 @@ func loadData(path string) error {
 			if i+1 < len(dataRead) {
 				dataTemp[c][dataRead[i+1]]++
 			}
-			total++
 		}
 	}
 
-	calculatePercentage(float32(total), dataTemp)
+	calculatePercentage(dataTemp)
 
 	return nil
 }
@@ -65,13 +64,15 @@ func readData(path string) (chan []byte, error) {
 	return dataCh, nil
 }
 
-func calculatePercentage(total float32, input map[byte]map[byte]int) {
+func calculatePercentage(input map[byte]map[byte]int) {
 	data = make(map[byte]map[byte]float32)
+	var total float32
 	for c, v := range input {
 		if _, ok := data[c]; !ok {
 			data[c] = make(map[byte]float32)
 		}
 
+		total = float32(len(v))
 		for c2, v2 := range v {
 			data[c][c2] = float32(v2) / total
 		}
