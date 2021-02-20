@@ -1,4 +1,4 @@
-package src
+package randname
 
 import (
 	"bufio"
@@ -8,10 +8,10 @@ import (
 	"github.com/pkg/errors"
 )
 
-var data map[byte]map[byte]float32
+var data map[string]map[string]float32
 
 func loadData(path string) error {
-	dataTemp := make(map[byte]map[byte]int)
+	dataTemp := make(map[string]map[string]int)
 	noChars := regexp.MustCompile(`\W`)
 
 	dataChannel, err := readData(path)
@@ -19,19 +19,40 @@ func loadData(path string) error {
 		return errors.Wrapf(err, "trying lading data from file: %s", path)
 	}
 
+	var letter, nextLetter, combine string
 	for dataRead := range dataChannel {
 		for i, c := range dataRead {
-			if noChars.Match([]byte{c}) {
+			letter = string(c)
+			//skip no letters
+			if noChars.Match([]byte(letter)) {
 				continue
 			}
 
-			if _, ok := dataTemp[c]; !ok {
-				dataTemp[c] = make(map[byte]int)
+			//check if it's no the last letter
+			if i+1 >= len(dataRead) {
+				continue
 			}
 
-			if i+1 < len(dataRead) {
-				dataTemp[c][dataRead[i+1]]++
+			//initialize the map for the letter
+			if _, ok := dataTemp[letter]; !ok {
+				dataTemp[letter] = make(map[string]int)
 			}
+
+			//count match
+			nextLetter = string(dataRead[i+1])
+			dataTemp[letter][nextLetter]++
+
+			if i+2 >= len(dataRead) {
+				continue
+			}
+
+			combine = letter + nextLetter
+			if _, ok := dataTemp[combine]; !ok {
+				dataTemp[combine] = make(map[string]int)
+			}
+
+			nextLetter = string(dataRead[i+2])
+			dataTemp[combine][nextLetter]++
 		}
 	}
 
@@ -64,12 +85,12 @@ func readData(path string) (chan []byte, error) {
 	return dataCh, nil
 }
 
-func calculatePercentage(input map[byte]map[byte]int) {
-	data = make(map[byte]map[byte]float32)
+func calculatePercentage(input map[string]map[string]int) {
+	data = make(map[string]map[string]float32)
 	var total float32
 	for c, v := range input {
 		if _, ok := data[c]; !ok {
-			data[c] = make(map[byte]float32)
+			data[c] = make(map[string]float32)
 		}
 
 		total = float32(len(v))
