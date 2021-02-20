@@ -6,6 +6,7 @@ import (
 	"path"
 	"runtime"
 	"strings"
+	"unicode/utf8"
 )
 
 func init() {
@@ -36,26 +37,31 @@ func GetRandomWithSeed(seed string, l int) (string, error) {
 		}
 	}
 
-	combined := pivot
 	var pivot2 string
 	name := strings.ToUpper(pivot[:1])
-	if len(pivot) > 1 {
-		name += pivot[1:2]
+	if utf8.RuneCount([]byte(pivot)) > 1 {
+		name += pivot[1:]
 	}
-	for i := 1; i < l; i++ {
+
+	if utf8.RuneCount([]byte(pivot)) > 2 {
+		pivot = pivot[utf8.RuneCount([]byte(pivot))-2:]
+	}
+	combined := pivot
+
+	for i := utf8.RuneCount([]byte(seed)); i < l; i++ {
 		pivot2 = getNext(combined)
 		if pivot == "" {
 			continue
 		}
 
-		if len(pivot) > 1 {
+		if utf8.RuneCount([]byte(pivot)) > 1 {
 			combined = pivot[1:] + pivot2
 		} else {
 			combined = pivot + pivot2
 		}
 
 		pivot = pivot2
-		name += strings.ToLower(string(pivot))
+		name += string(pivot)
 	}
 
 	return name, nil
@@ -86,6 +92,7 @@ func getPivot() string {
 }
 
 func getNext(pivot string) string {
+	pivot = strings.ToLower(pivot)
 	values := make([]*letterValue, 0)
 
 	if _, ok := data[pivot]; !ok {
