@@ -1,7 +1,8 @@
 __debug_bin
 test/cmd/cmd
-test/cmd/name-random*
+test/cmd/*name-random*
 test/cmd/cpu*
 test/cmd/mem*
 test/cmd/trace*
 .vscode/
+*output.txt
