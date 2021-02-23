@@ -13,6 +13,8 @@ var (
 	nameLen    = flag.Int("len", 4, "length of the name(s)")
 	minNameLen = flag.Int("len-min", 4, "the minimum of lenght of the name(s)")
 	seed       = flag.String("seed", "", "the minimum of lenght of the name(s)")
+	dataSource = flag.String("source", "", "the source file to load data")
+	append     = flag.Bool("append", false, "flag to indicate if append or replace the current data")
 )
 
 func main() {
@@ -21,6 +23,15 @@ func main() {
 	// defer profile.Start(profile.TraceProfile, profile.ProfilePath(".")).Stop()
 
 	flag.Parse()
+
+	if *dataSource != "" {
+		if *append {
+			randName.AppendData(*dataSource)
+		} else {
+			randName.LoadData(*dataSource)
+		}
+	}
+
 	var l int
 	for i := 0; i < *count; i++ {
 		l = *nameLen
