@@ -5,4 +5,5 @@ test/cmd/cpu*
 test/cmd/mem*
 test/cmd/trace*
 .vscode/
-*output.txt
+*output.*
+*result.*
