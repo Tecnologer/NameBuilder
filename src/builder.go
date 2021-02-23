@@ -1,15 +1,17 @@
 package randname
 
 import (
-	"fmt"
-	"math/rand"
 	"path"
 	"runtime"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/pkg/errors"
 )
 
-func init() {
+var currentData *data
+
+func loadDefault() error {
 	_, filename, _, ok := runtime.Caller(0)
 	if !ok {
 		panic("file 'input_names.txt' not found")
@@ -17,23 +19,52 @@ func init() {
 
 	filepath := path.Join(path.Dir(filename), "../src/input_names.txt")
 
-	err := loadData(filepath)
+	data, err := loadData(newDataConfig(filepath, false))
+
 	if err != nil {
-		panic(err)
+		return err
 	}
 
+	currentData = data
+	return nil
+}
+
+//AppendData appends data to the current data
+func AppendData(path string) error {
+	data, err := loadData(newDataConfig(path, true))
+	if err != nil {
+		return errors.Wrap(err, "append data fails")
+	}
+
+	currentData = data
+	return nil
+}
+
+//LoadData replace the current data with the data in the specific path
+func LoadData(path string) error {
+	data, err := loadData(newDataConfig(path, false))
+	if err != nil {
+		return errors.Wrap(err, "append load new data fails")
+	}
+
+	currentData = data
+	return nil
 }
 
 //GetRandomWithSeed generates a random name with the specified len and starting with the seed
 func GetRandomWithSeed(seed string, l int) (string, error) {
-	if data == nil {
-		return "", fmt.Errorf("data is not loaded")
+	if currentData == nil {
+		err := loadDefault()
+
+		if err != nil {
+			return "", errors.Wrap(err, "get random w/seed: data is not loaded")
+		}
 	}
 
 	pivot := seed
 	if seed == "" {
 		for i := 0; i < 10 && pivot == ""; i++ {
-			pivot = getPivot()
+			pivot = currentData.getPivot()
 		}
 	}
 
@@ -49,7 +80,7 @@ func GetRandomWithSeed(seed string, l int) (string, error) {
 	combined := pivot
 
 	for i := utf8.RuneCount([]byte(seed)); i < l; i++ {
-		pivot2 = getNext(combined)
+		pivot2 = currentData.getNext(combined)
 		if pivot == "" {
 			continue
 		}
@@ -69,52 +100,22 @@ func GetRandomWithSeed(seed string, l int) (string, error) {
 
 //GetRandom generates a random name with the specified len
 func GetRandom(l int) (string, error) {
-	if data == nil {
-		return "", fmt.Errorf("data is not loaded")
+	if currentData == nil {
+		err := loadDefault()
+
+		if err != nil {
+			return "", errors.Wrap(err, "get random: data is not loaded")
+		}
 	}
 
-	pivot := getPivot()
+	pivot := currentData.getPivot()
 	return GetRandomWithSeed(pivot, l)
 }
 
-func getPivot() string {
-	index := rand.Intn(len(data) - 1)
-
-	count := 0
-	for k := range data {
-		if count == index {
-			return k
-		}
-		count++
+func newDataConfig(path string, append bool) *dataConfig {
+	return &dataConfig{
+		path:        path,
+		append:      append,
+		currentData: currentData,
 	}
-
-	return ""
-}
-
-func getNext(pivot string) string {
-	pivot = strings.ToLower(pivot)
-	values := make([]*letterValue, 0)
-
-	if _, ok := data[pivot]; !ok {
-		return ""
-	}
-
-	for c, v := range data[pivot] {
-		values = append(values, &letterValue{c, v})
-	}
-
-	By(byProbilityDesc).Sort(values)
-
-	if len(values) > 5 {
-		index := rand.Intn(4)
-		return values[index].letter
-	}
-
-	index := 0
-	if len(values) > 1 {
-		index = rand.Intn(len(values) - 1)
-	}
-
-	return values[index].letter
-
 }
