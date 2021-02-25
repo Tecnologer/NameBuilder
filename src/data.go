@@ -3,6 +3,7 @@ package randname
 import (
 	"math/rand"
 	"strings"
+	"time"
 )
 
 type data map[string]map[string]float32
@@ -39,6 +40,7 @@ func (d *data) calculate(k, c string, count, total int) {
 }
 
 func (d *data) getPivot() string {
+	rand.Seed(time.Now().UnixNano())
 	index := rand.Intn(len(*d) - 1)
 
 	count := 0
@@ -66,6 +68,7 @@ func (d *data) getNext(pivot string) string {
 
 	By(byProbilityDesc).Sort(values)
 
+	rand.Seed(time.Now().UnixNano())
 	if len(values) > 5 {
 		index := rand.Intn(4)
 		return values[index].letter
