@@ -2,6 +2,7 @@ package randname
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"regexp"
 
@@ -17,6 +18,10 @@ type dataConfig struct {
 }
 
 func loadData(conf *dataConfig) (*data, error) {
+	if !fileExists(conf.path) {
+		return nil, fmt.Errorf("the source file %s doesn't exists", conf.path)
+	}
+
 	dataTemp := new(inputData)
 	noChars = regexp.MustCompile(`(?mi)(?:[\p{L}\p{M}])`)
 
@@ -74,4 +79,9 @@ func readData(path string) (chan string, error) {
 	}(dataCh, file)
 
 	return dataCh, nil
+}
+
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	return !os.IsNotExist(err)
 }
