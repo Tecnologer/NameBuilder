@@ -51,15 +51,18 @@ func main() {
 
    ```bash
    Usage of ./name-random:
+   -append
+    	flag to indicate if append or replace the current data
    -count int
-   		how many names should be generated (default 1)
+    	how many names should be generated (default 1)
    -len int
-   		length of the name(s) (default 4)
+    	length of the name(s) (default 6)
    -len-min int
-   		the minimum of lenght of the name(s) (default 4)
+    	the minimum of lenght of the name(s) (default 4)
    -seed string
-   		the minimum of lenght of the name(s)
-
+    	the minimum of lenght of the name(s)
+   -source string
+    	the source file to load data
    ```
 
 ### Example CLI
