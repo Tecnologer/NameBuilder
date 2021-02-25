@@ -68,34 +68,43 @@ func GetRandomWithSeed(seed string, l int) (string, error) {
 		}
 	}
 
-	var pivot2 string
 	name := strings.ToUpper(pivot[:1])
-	if utf8.RuneCount([]byte(pivot)) > 1 {
+	pivotLen := utf8.RuneCountInString(pivot)
+
+	if pivotLen > 1 {
 		name += pivot[1:]
 	}
 
-	if utf8.RuneCount([]byte(pivot)) > 2 {
-		pivot = pivot[utf8.RuneCount([]byte(pivot))-2:]
+	if (pivotLen % 2) == 0 {
+		pivot = pivot[pivotLen-2:]
+	} else {
+		pivot = pivot[pivotLen-1:]
 	}
-	combined := pivot
 
-	for i := utf8.RuneCount([]byte(seed)); i < l; i++ {
-		pivot2 = currentData.getNext(combined)
-		if pivot == "" {
+	var nextRune string
+	var nextRunLen int
+
+	for utf8.RuneCountInString(name) < l {
+		nextRune = currentData.getNext(pivot)
+		if nextRune == "" {
 			continue
 		}
 
-		if utf8.RuneCount([]byte(pivot)) > 1 {
-			combined = pivot[1:] + pivot2
+		pivotLen = utf8.RuneCountInString(pivot)
+		nextRunLen = utf8.RuneCountInString(nextRune)
+
+		if (nextRunLen % 2) == 0 {
+			pivot = nextRune
+		} else if pivotLen > 1 {
+			pivot = pivot[1:] + nextRune
 		} else {
-			combined = pivot + pivot2
+			pivot = pivot + nextRune
 		}
 
-		pivot = pivot2
-		name += string(pivot)
+		name += string(nextRune)
 	}
 
-	return name, nil
+	return name[:l], nil
 }
 
 //GetRandom generates a random name with the specified len
